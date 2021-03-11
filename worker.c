@@ -90,9 +90,9 @@ void generate_randoms(int* randoms, int rand_min, int rand_max, unsigned rand_si
    // seed random number generator
    srand(rand_seed);
 
-   // generate random numbers
+   // generate random numbers from rand_min to rand_max (inclusive)
    for (int idx = 0; idx < rand_size; idx++) {
-      randoms[idx] = (rand() % rand_max) + rand_min;
+      randoms[idx] = (rand() % ((rand_max - rand_min) + 1)) + rand_min;
       // printf("random: %d\n", randoms[idx]);
    }
 }
