@@ -13,7 +13,7 @@ RANDOM_SIZE = 3000        # number of random numbers to generate
 RANDOM_SEED = 1615011838  # seed for random number generator
 
 # number of processes to spawn
-NUM_WORKERS = 1 # number of processes to spawn (~number of cores)
+NUM_WORKERS = 8 # number of processes to spawn (~number of cores)
 
 # X range as integers (i.e. multiplied by 1000)
 X_MIN = -1000
@@ -24,20 +24,20 @@ def run_worker(x):
 
   csv_file = os.path.join(RESIDUE_DIR, "residues%+d.csv" % x)
 
-  # worker/xz paths
-  if platform.system() == 'Windows':
-    worker_cmd = "worker.exe"
-    xz_cmd = os.path.join("utils", "xz.exe")
-  else:
-    worker_cmd = "./worker"
-    xz_cmd = "xz"
-
   # run worker process
-  ret = subprocess.call([worker_cmd, csv_file, str(x), str(RANDOM_MIN), str(RANDOM_MAX), str(RANDOM_SIZE), str(RANDOM_SEED)])
+  if platform.system() == 'Windows':
+    ret = subprocess.call(["worker.exe", csv_file, str(x), str(RANDOM_MIN), str(RANDOM_MAX), str(RANDOM_SIZE), str(RANDOM_SEED)])
 
-  # compress with xz
-  if ret == 0:
-    subprocess.call([xz_cmd, csv_file], shell=True)
+    # compress with xz
+    if ret == 0:
+      ret = subprocess.call(["utils\\xz.exe", csv_file])
+
+  else: # Linux
+    ret = subprocess.call([f"./worker {csv_file} {x} {RANDOM_MIN} {RANDOM_MAX} {RANDOM_SIZE} {RANDOM_SEED}"], shell=True)
+
+    # compress with xz
+    if ret == 0:
+      ret = subprocess.call([f"xz {csv_file}"], shell=True)
 
   # return status
   if ret != 0:
